@@ -1,0 +1,3 @@
+PyPortfolioOpt>=1.5.1
+amplpy>=0.8.1
+scikit-learn>=1.0.2
