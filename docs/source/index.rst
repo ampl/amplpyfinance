@@ -1,11 +1,12 @@
 .. _amplapi:
 
-Financial portfolio optimization with amplpy
+Financial Portfolio Optimization with amplpy
 --------------------------------------------
 
 This package replicates some financial portfolio optimization models 
 from `pypfopt <https://github.com/robertmartin8/PyPortfolioOpt>`_
-using `amplpy <https://github.com/ampl/amplpy>`_.
+using `amplpy <https://github.com/ampl/amplpy>`_ and provides a similar
+interface.
 
 Links
 `````
@@ -13,10 +14,11 @@ Links
 * GitHub Repository: https://github.com/ampl/amplpyfinance
 * PyPI Repository: https://pypi.python.org/pypi/amplpyfinance
 
-Contents
-````````
+Classes
+```````
 
 .. toctree::
    :maxdepth: 2
 
-   reference
+   classes/efficient_frontier
+   classes/discrete_allocation

@@ -46,6 +46,7 @@ class EfficientFrontierWithAMPL(BaseOptimizer):
         expected_returns,
         cov_matrix,
         weight_bounds=(0, 1),
+        tickers=None,
         solver="gurobi",
         solver_options="",
         verbose=False,
@@ -84,9 +85,9 @@ class EfficientFrontierWithAMPL(BaseOptimizer):
         :type weight_bounds: tuple OR tuple list, optional
         :param tickers: asset labels.
         :type tickers: str list, optional
-        :param solver: name of solver.
+        :param solver: name of the AMPL solver to use.
         :type solver: str
-        :param solver_options: parameters for the given solver
+        :param solver_options: options for the given solver
         :type solver_options: str
         :param verbose: whether performance and debugging info should be printed, defaults to False
         :type verbose: bool, optional

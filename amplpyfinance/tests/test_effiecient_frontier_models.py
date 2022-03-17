@@ -23,7 +23,7 @@ def save_portfolio(ampl, risk_free_rate=0.02):
 
 
 class TestEfficientFrontierModels(TestBase.TestBase):
-    """Test TestEfficientFrontierModels."""
+    """Test EfficientFrontierWithAMPL models."""
 
     def test_min_volatility(self):
         ef = EfficientFrontierWithAMPL(
