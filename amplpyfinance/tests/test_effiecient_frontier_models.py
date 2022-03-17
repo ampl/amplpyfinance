@@ -327,17 +327,24 @@ class TestEfficientFrontierModels(TestBase.TestBase):
         ampl = AMPL()
         ampl.eval(
             r"""
+            param target_volatility;
+            param market_neutral default 0;
+
             set A ordered;
             param S{A, A};
             param mu{A} default 0;
-            param target_variance;
-            var w{A} >= 0 <= 1;
+
+            param lb default 0;
+            param ub default 1;
+            var w{A} >= lb <= ub;
+            
             maximize portfolio_return:
                 sum {i in A} mu[i] * w[i];
             s.t. portfolio_variance:
-                sum {i in A, j in A} w[i] * S[i, j] * w[j] <= target_variance;
+                sum {i in A, j in A} w[i] * S[i, j] * w[j] <= target_volatility^2;
             s.t. portfolio_weights:
                 sum {i in A} w[i] = 1;
+
             set SECTORS default {};
             set SECTOR_MEMBERS{SECTORS};
             param sector_lower{SECTORS} default -Infinity;
@@ -353,7 +360,7 @@ class TestEfficientFrontierModels(TestBase.TestBase):
             ef.cov_matrix, index=ef.tickers, columns=ef.tickers
         ).unstack(level=0)
         ampl.param["mu"] = ef.expected_returns
-        ampl.param["target_variance"] = 0.15**2
+        ampl.param["target_volatility"] = 0.15
         sectors = set(sector_mapper.values())
         ampl.set["SECTORS"] = sectors
         for sector in sectors:
@@ -380,24 +387,30 @@ class TestEfficientFrontierModels(TestBase.TestBase):
         ampl = AMPL()
         ampl.eval(
             r"""
+            param target_volatility;
+            param market_neutral default 0;
+
             set A ordered;
             param S{A, A};
             param mu{A} default 0;
-            param target_variance;
-            var w{A} >= 0 <= 1;
-            var y{A} binary;
+            
+            param lb default 0;
+            param ub default 1;
+            var w{A} >= lb <= ub;
+            
             maximize portfolio_return:
                 sum {i in A} mu[i] * w[i];
             s.t. portfolio_variance:
-                sum {i in A, j in A} w[i] * S[i, j] * w[j] <= target_variance;
+                sum {i in A, j in A} w[i] * S[i, j] * w[j] <= target_volatility^2;
             s.t. portfolio_weights:
-                sum {i in A} w[i] = 1;
-            param lb default 0;
-            param ub default 1;
+                sum {i in A} w[i] = if market_neutral then 0 else 1;
+            
+            var y{A} binary;
             s.t. w_lower{i in A}:
                 lb * y[i] <= w[i];
             s.t. w_upper{i in A}:
                 w[i] <= ub * y[i];
+
             param card_ub default Infinity;
             s.t. card_limit:
                 sum {i in A} y[i] <= card_ub;
@@ -409,7 +422,8 @@ class TestEfficientFrontierModels(TestBase.TestBase):
         ).unstack(level=0)
         ampl.param["mu"] = ef.expected_returns
         ampl.param["card_ub"] = 3
-        ampl.param["target_variance"] = 0.15**2
+        ampl.param["target_volatility"] = 0.15
+        ampl.param["market_neutral"] = False
         ampl.option["solver"] = "gurobi"
         ampl.solve()
         weights2, mu2, sigma2, sharpe2 = save_portfolio(ampl)

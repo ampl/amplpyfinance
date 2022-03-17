@@ -67,7 +67,7 @@ class DiscreteAllocationWithAMPL(DiscreteAllocation):
 
             \begin{equation*}
             \begin{aligned}
-            & \underset{x \in \mathbb{Z}^n}{\text{minimise}} & & r + \lVert wT - x \odot p \rVert_1  \\
+            & \underset{x \in \mathbb{Z}^n}{\text{minimize}} & & r + \lVert wT - x \odot p \rVert_1  \\
             & \text{subject to} & & r + x \cdot p = T\\
             \end{aligned}
             \end{equation*}

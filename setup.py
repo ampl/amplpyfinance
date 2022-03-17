@@ -28,7 +28,7 @@ def ls_dir(base_dir):
 
 setup(
     name="amplpyfinance",
-    version="0.0.0a0",
+    version="0.0.0a1",
     description="Financial portfolio optimization with amplpy",
     long_description=__doc__,
     license="MIT",

@@ -31,9 +31,9 @@ class EfficientFrontierWithAMPL(BaseOptimizer):
 
     - :func:`min_volatility()` optimizes for minimum volatility
     - :func:`max_sharpe()` optimizes for maximal Sharpe ratio (a.k.a the tangency portfolio)
-    - :func:`max_quadratic_utility()` maximises the quadratic utility, given some risk aversion.
-    - :func:`efficient_risk()` maximises return for a given target risk
-    - :func:`efficient_return()` minimises risk for a given target returns
+    - :func:`max_quadratic_utility()` maximizes the quadratic utility, given some risk aversion.
+    - :func:`efficient_risk()` maximizes return for a given target risk
+    - :func:`efficient_return()` minimizes risk for a given target returns
 
     - :func:`portfolio_performance()` calculates the expected return, volatility and Sharpe ratio for
       the optimized portfolio.
@@ -74,7 +74,7 @@ class EfficientFrontierWithAMPL(BaseOptimizer):
             ampl.param["ub"] = weight_bounds[1]
 
         :param expected_returns: expected returns for each asset. Can be None if
-                                optimising for volatility only (but not recommended).
+                                optimizing for volatility only (but not recommended).
         :type expected_returns: pd.Series, list, np.ndarray
         :param cov_matrix: covariance of returns for each asset. This **must** be
                            positive semidefinite, otherwise optimization will fail.
@@ -285,7 +285,7 @@ class EfficientFrontierWithAMPL(BaseOptimizer):
 
     def _max_return(self):
         """
-        Helper method to maximise return. This should not be used to optimize a portfolio.
+        Helper method to maximize return. This should not be used to optimize a portfolio.
 
         AMPL version of :func:`pypfopt.EfficientFrontier._max_return` with the same interface:
 
@@ -301,7 +301,7 @@ class EfficientFrontierWithAMPL(BaseOptimizer):
 
     def min_volatility(self):
         """
-        Minimise volatility.
+        Minimize volatility.
 
         Corresponding AMPL code:
 
@@ -334,7 +334,7 @@ class EfficientFrontierWithAMPL(BaseOptimizer):
 
     def efficient_risk(self, target_volatility, market_neutral=False):
         """
-        Maximise return for a target risk. The resulting portfolio will have a
+        Maximize return for a target risk. The resulting portfolio will have a
         volatility less than the target (but not guaranteed to be equal).
 
         Corresponding AMPL code:
@@ -460,7 +460,7 @@ class EfficientFrontierWithAMPL(BaseOptimizer):
 
     def max_sharpe(self, risk_free_rate=0.02):
         """
-        Maximise the Sharpe Ratio. The result is also referred to as the tangency portfolio,
+        Maximize the Sharpe Ratio. The result is also referred to as the tangency portfolio,
         as it is the portfolio for which the capital market line is tangent to the efficient frontier.
 
         This is a convex optimization problem after making a certain variable substitution. See
@@ -513,7 +513,7 @@ class EfficientFrontierWithAMPL(BaseOptimizer):
 
     def max_quadratic_utility(self, risk_aversion=1, market_neutral=False):
         r"""
-        Maximise the given quadratic utility, i.e:
+        Maximize the given quadratic utility, i.e:
 
         .. math::
 
