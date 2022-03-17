@@ -220,7 +220,7 @@ latex_elements = {
 latex_documents = [
     (
         "index",
-        "amplpyfinance",
+        "amplpyfinance.tex",
         "amplpyfinance documentation",
         "Filipe Brandão",
         "manual",
