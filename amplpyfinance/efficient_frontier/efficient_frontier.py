@@ -6,15 +6,93 @@ from amplpy import AMPL
 
 
 class EfficientFrontierWithAMPL(BaseOptimizer):
+    """
+    An EfficientFrontierWithAMPL object contains multiple
+    optimization methods that can be called (corresponding to different objective
+    functions) with various parameters.
+
+    AMPL version of :func:`pypfopt.EfficientFrontier` with similar interface.
+
+    Instance variables:
+
+    - Inputs:
+
+        - ``n_assets`` - int
+        - ``tickers`` - str list
+        - ``bounds`` - float tuple OR (float tuple) list
+        - ``cov_matrix`` - np.ndarray
+        - ``expected_returns`` - np.ndarray
+        - ``solver`` - str
+        - ``solver_options`` - str
+
+    - Output: ``weights`` - np.ndarray
+
+    Public methods:
+
+    - :func:`min_volatility()` optimizes for minimum volatility
+    - :func:`max_sharpe()` optimizes for maximal Sharpe ratio (a.k.a the tangency portfolio)
+    - :func:`max_quadratic_utility()` maximises the quadratic utility, given some risk aversion.
+    - :func:`efficient_risk()` maximises return for a given target risk
+    - :func:`efficient_return()` minimises risk for a given target returns
+
+    - :func:`portfolio_performance()` calculates the expected return, volatility and Sharpe ratio for
+      the optimized portfolio.
+    - :func:`clean_weights()` rounds the weights and clips near-zeros.
+    - :func:`save_weights_to_file()` saves the weights to csv, json, or txt.
+    """
+
     def __init__(
         self,
         expected_returns,
         cov_matrix,
         weight_bounds=(0, 1),
         solver="gurobi",
-        verbose=False,
         solver_options="",
+        verbose=False,
     ):
+        """
+        Corresponding AMPL code:
+
+        .. code-block:: ampl
+
+            set A ordered;
+            param S{A, A};
+            param mu{A} default 0;
+            param lb default 0;
+            param ub default 1;
+            var w{A} >= lb <= ub;
+
+        .. code-block:: python
+
+            ampl.set["A"] = tickers
+            ampl.param["S"] = pd.DataFrame(
+                cov_matrix, index=tickers, columns=tickers
+            ).unstack(level=0)
+            ampl.param["mu"] = expected_returns
+            ampl.param["lb"] = weight_bounds[0]
+            ampl.param["ub"] = weight_bounds[1]
+
+        :param expected_returns: expected returns for each asset. Can be None if
+                                optimising for volatility only (but not recommended).
+        :type expected_returns: pd.Series, list, np.ndarray
+        :param cov_matrix: covariance of returns for each asset. This **must** be
+                           positive semidefinite, otherwise optimization will fail.
+        :type cov_matrix: pd.DataFrame or np.array
+        :param weight_bounds: minimum and maximum weight of each asset OR single min/max pair
+                              if all identical, defaults to (0, 1). Must be changed to (-1, 1)
+                              for portfolios with shorting.
+        :type weight_bounds: tuple OR tuple list, optional
+        :param tickers: asset labels.
+        :type tickers: str list, optional
+        :param solver: name of solver.
+        :type solver: str
+        :param solver_options: parameters for the given solver
+        :type solver_options: str
+        :param verbose: whether performance and debugging info should be printed, defaults to False
+        :type verbose: bool, optional
+        :raises TypeError: if ``expected_returns`` is not a series, list or array
+        :raises TypeError: if ``cov_matrix`` is not a dataframe or array
+        """
         # Inputs
         self.cov_matrix = EfficientFrontierWithAMPL._validate_cov_matrix(cov_matrix)
         self.expected_returns = EfficientFrontierWithAMPL._validate_expected_returns(
@@ -28,12 +106,13 @@ class EfficientFrontierWithAMPL(BaseOptimizer):
             num_assets = len(expected_returns)
 
         # Labels
-        if isinstance(expected_returns, pd.Series):
-            tickers = list(expected_returns.index)
-        elif isinstance(cov_matrix, pd.DataFrame):
-            tickers = list(cov_matrix.columns)
-        else:  # use integer labels
-            tickers = list(range(num_assets))
+        if not tickers:
+            if isinstance(expected_returns, pd.Series):
+                tickers = list(expected_returns.index)
+            elif isinstance(cov_matrix, pd.DataFrame):
+                tickers = list(cov_matrix.columns)
+            else:  # use integer labels
+                tickers = list(range(num_assets))
 
         if expected_returns is not None and cov_matrix is not None:
             if cov_matrix.shape != (num_assets, num_assets):
@@ -204,46 +283,100 @@ class EfficientFrontierWithAMPL(BaseOptimizer):
         ampl.solve()
 
     def _max_return(self):
+        """
+        Helper method to maximise return. This should not be used to optimize a portfolio.
+
+        AMPL version of :func:`pypfopt.EfficientFrontier._max_return` with the same interface:
+
+        :return: asset weights for the return-minimising portfolio
+        :rtype: OrderedDict
+        """
         if self.expected_returns is None:
             raise ValueError("no expected returns provided")
 
         self._solve("_max_return")
-        self.save_portfolio()
+        self._save_portfolio()
         return self.mu
 
-    def max_quadratic_utility(self, risk_aversion=1, market_neutral=False):
-        if risk_aversion <= 0:
-            raise ValueError("risk aversion coefficient must be greater than zero")
-
-        ampl = self.ampl
-        ampl.param["risk_aversion"] = risk_aversion
-        ampl.param["market_neutral"] = 1 if market_neutral else 0
-        self._solve("max_quadratic_utility")
-        self.save_portfolio()
-        return self._make_output_weights(self.weights)
-
-    def add_sector_constraints(self, sector_mapper, sector_lower, sector_upper):
-        if np.any(self.weight_bounds[0] < 0):
-            warnings.warn(
-                "Sector constraints may not produce reasonable results if shorts are allowed."
-            )
-
-        ampl = self.ampl
-        sectors = set(sector_mapper.values())
-        ampl.set["SECTORS"] = sectors
-        for sector in sectors:
-            ampl.set["SECTOR_MEMBERS"][sector] = [
-                ticker for ticker, s in sector_mapper.items() if s == sector
-            ]
-        ampl.param["sector_lower"] = sector_lower
-        ampl.param["sector_upper"] = sector_upper
-
     def min_volatility(self):
+        """
+        Minimise volatility.
+
+        Corresponding AMPL code:
+
+        .. code-block:: ampl
+
+            set A ordered;
+            param S{A, A};
+
+            param lb default 0;
+            param ub default 1;
+            var w{A} >= lb <= ub;
+
+            minimize portfolio_variance:
+                sum {i in A, j in A} w[i] * S[i, j] * w[j];
+            s.t. portfolio_weights:
+                sum {i in A} w[i] = 1;
+
+        .. code-block:: python
+
+            ampl.solve()
+
+        AMPL version of :func:`pypfopt.EfficientFrontier.min_volatility` with the same interface:
+
+        :return: asset weights for the volatility-minimising portfolio
+        :rtype: OrderedDict
+        """
         self._solve("min_volatility")
-        self.save_portfolio()
+        self._save_portfolio()
         return self._make_output_weights(self.weights)
 
     def efficient_risk(self, target_volatility, market_neutral=False):
+        """
+        Maximise return for a target risk. The resulting portfolio will have a
+        volatility less than the target (but not guaranteed to be equal).
+
+        Corresponding AMPL code:
+
+        .. code-block:: ampl
+
+            param target_volatility;
+            param market_neutral default 0;
+
+            set A ordered;
+            param S{A, A};
+            param mu{A} default 0;
+
+            param lb default 0;
+            param ub default 1;
+            var w{A} >= lb <= ub;
+
+            maximize portfolio_return:
+                sum {i in A} mu[i] * w[i];
+            s.t. portfolio_variance:
+                sum {i in A, j in A} w[i] * S[i, j] * w[j] <= target_volatility^2;
+            s.t. portfolio_weights:
+                sum {i in A} w[i] = if market_neutral then 0 else 1;
+
+        .. code-block:: python
+
+            ampl.param["target_volatility"] = target_volatility
+            ampl.param["market_neutral"] = market_neutral
+            ampl.solve()
+
+        AMPL version of :func:`pypfopt.EfficientFrontier.efficient_risk` with the same interface:
+
+        :param target_volatility: the desired maximum volatility of the resulting portfolio.
+        :type target_volatility: float
+        :param market_neutral: whether the portfolio should be market neutral (weights sum to zero),
+                               defaults to False. Requires negative lower weight bound.
+        :param market_neutral: bool, optional
+        :raises ValueError: if ``target_volatility`` is not a positive float
+        :raises ValueError: if no portfolio can be found with volatility equal to ``target_volatility``
+        :raises ValueError: if ``risk_free_rate`` is non-numeric
+        :return: asset weights for the efficient risk portfolio
+        :rtype: OrderedDict
+        """
         if not isinstance(target_volatility, (float, int)) or target_volatility < 0:
             raise ValueError("target_volatility should be a positive float")
 
@@ -260,10 +393,54 @@ class EfficientFrontierWithAMPL(BaseOptimizer):
         ampl.param["market_neutral"] = 1 if market_neutral else 0
         ampl.param["target_variance"] = target_volatility**2
         self._solve("efficient_risk")
-        self.save_portfolio()
+        self._save_portfolio()
         return self._make_output_weights(self.weights)
 
     def efficient_return(self, target_return, market_neutral=False):
+        """
+        Calculate the 'Markowitz portfolio', minimising volatility for a given target return.
+
+        Corresponding AMPL code:
+
+        .. code-block:: ampl
+
+            param target_return;
+            param market_neutral default 0;
+
+            set A ordered;
+            param S{A, A};
+            param mu{A} default 0;
+
+            param lb default 0;
+            param ub default 1;
+            var w{A} >= lb <= ub;
+
+            minimize portfolio_variance:
+                sum {i in A, j in A} w[i] * S[i, j] * w[j];
+            s.t. portfolio__return:
+                sum {i in A} mu[i] * w[i] >= target_return;
+            s.t. portfolio_weights:
+                sum {i in A} w[i] = if market_neutral then 0 else 1;
+
+        .. code-block:: python
+
+            ampl.param["target_return"] = target_return
+            ampl.param["market_neutral"] = market_neutral
+            ampl.solve()
+
+        AMPL version of :func:`pypfopt.EfficientFrontier.efficient_return` with the same interface:
+
+        :param target_return: the desired return of the resulting portfolio.
+        :type target_return: float
+        :param market_neutral: whether the portfolio should be market neutral (weights sum to zero),
+                               defaults to False. Requires negative lower weight bound.
+        :type market_neutral: bool, optional
+        :raises ValueError: if ``target_return`` is not a positive float
+        :raises ValueError: if no portfolio can be found with return equal to ``target_return``
+        :return: asset weights for the Markowitz portfolio
+        :rtype: OrderedDict
+        """
+
         if not isinstance(target_return, float) or target_return < 0:
             raise ValueError("target_return should be a positive float")
         if not self._max_return_value:
@@ -277,20 +454,193 @@ class EfficientFrontierWithAMPL(BaseOptimizer):
         ampl.param["market_neutral"] = 1 if market_neutral else 0
         ampl.param["target_return"] = target_return
         self._solve("efficient_return")
-        self.save_portfolio()
+        self._save_portfolio()
         return self._make_output_weights(self.weights)
 
     def max_sharpe(self, risk_free_rate=0.02):
+        """
+        Maximise the Sharpe Ratio. The result is also referred to as the tangency portfolio,
+        as it is the portfolio for which the capital market line is tangent to the efficient frontier.
+
+        This is a convex optimization problem after making a certain variable substitution. See
+        `Cornuejols and Tutuncu (2006) <http://web.math.ku.dk/~rolf/CT_FinOpt.pdf>`_ for more.
+
+        Corresponding AMPL code:
+
+        .. code-block:: ampl
+
+            param risk_free_rate default 0.02;
+
+            set A ordered;
+            param S{A, A};
+            param mu{A} default 0;
+
+            var k >= 0;
+            var z{i in A} >= 0;  # scaled weights
+            var w{i in A} = z[i] / k;
+
+            minimize portfolio_sharpe:
+                sum {i in A, j in A} z[i] * S[i, j] * z[j];
+            s.t. muz:
+                sum {i in A} (mu[i] - risk_free_rate) * z[i] = 1;
+            s.t. portfolio_weights:
+                sum {i in A}  z[i] = k;
+
+        .. code-block:: python
+
+            ampl.param["risk_free_rate"] = risk_free_rate
+            ampl.solve()
+
+        AMPL version of :func:`pypfopt.EfficientFrontier.max_sharpe` with the same interface:
+
+        :param risk_free_rate: risk-free rate of borrowing/lending, defaults to 0.02.
+                               The period of the risk-free rate should correspond to the
+                               frequency of expected returns.
+        :type risk_free_rate: float, optional
+        :raises ValueError: if ``risk_free_rate`` is non-numeric
+        :return: asset weights for the Sharpe-maximising portfolio
+        :rtype: OrderedDict
+        """
         if not isinstance(risk_free_rate, (int, float)):
             raise ValueError("risk_free_rate should be numeric")
         ampl = self.ampl
         ampl.param["risk_free_rate"] = risk_free_rate
         self._solve("max_sharpe")
         ampl.eval("let {i in A} w[i] := z[i] / k;")
-        self.save_portfolio()
+        self._save_portfolio()
         return self._make_output_weights(self.weights)
 
-    def save_portfolio(self, risk_free_rate=None):
+    def max_quadratic_utility(self, risk_aversion=1, market_neutral=False):
+        r"""
+        Maximise the given quadratic utility, i.e:
+
+        .. math::
+
+            \max_w w^T \mu - \frac \delta 2 w^T \Sigma w
+
+        Corresponding AMPL code:
+
+        .. code-block:: ampl
+
+            param risk_aversion default 1;
+            param market_neutral default 0;
+
+            set A ordered;
+            param S{A, A};
+            param mu{A} default 0;
+
+            param lb default 0;
+            param ub default 1;
+            var w{A} >= lb <= ub;
+
+            maximize quadratic_utility:
+                sum {i in A} mu[i] * w[i]
+                - 0.5 * risk_aversion * sum {i in A, j in A} w[i] * S[i, j] * w[j];
+            s.t. portfolio_weights:
+                sum {i in A} w[i] = if market_neutral then 0 else 1;
+
+        .. code-block:: python
+
+            ampl.param["risk_aversion"] = risk_aversion
+            ampl.param["market_neutral"] = market_neutral
+            ampl.solve()
+
+        AMPL version of :func:`pypfopt.EfficientFrontier.max_quadratic_utility` with the same interface:
+
+        :param risk_aversion: risk aversion parameter (must be greater than 0),
+                              defaults to 1
+        :type risk_aversion: positive float
+        :param market_neutral: whether the portfolio should be market neutral (weights sum to zero),
+                               defaults to False. Requires negative lower weight bound.
+        :param market_neutral: bool, optional
+        :return: asset weights for the maximum-utility portfolio
+        :rtype: OrderedDict
+        """
+        if risk_aversion <= 0:
+            raise ValueError("risk aversion coefficient must be greater than zero")
+
+        ampl = self.ampl
+        ampl.param["risk_aversion"] = risk_aversion
+        ampl.param["market_neutral"] = 1 if market_neutral else 0
+        self._solve("max_quadratic_utility")
+        self._save_portfolio()
+        return self._make_output_weights(self.weights)
+
+    def add_sector_constraints(self, sector_mapper, sector_lower, sector_upper):
+        """
+        Adds constraints on the sum of weights of different groups of assets.
+        Most commonly, these will be sector constraints e.g portfolio's exposure to
+        tech must be less than x%::
+
+            sector_mapper = {
+                "GOOG": "tech",
+                "FB": "tech",,
+                "XOM": "Oil/Gas",
+                "RRC": "Oil/Gas",
+                "MA": "Financials",
+                "JPM": "Financials",
+            }
+
+            sector_lower = {"tech": 0.1}  # at least 10% to tech
+            sector_upper = {
+                "tech": 0.4, # less than 40% tech
+                "Oil/Gas": 0.1 # less than 10% oil and gas
+            }
+
+        Corresponding AMPL code:
+
+        .. code-block:: ampl
+
+            param lb default 0;
+            param ub default 1;
+            var w{A} >= lb <= ub;
+
+            set SECTORS default {};
+            set SECTOR_MEMBERS{SECTORS};
+            param sector_lower{SECTORS} default -Infinity;
+            param sector_upper{SECTORS} default Infinity;
+
+            s.t. sector_constraints_lower{s in SECTORS: sector_lower[s] != -Infinity}:
+                sum {i in SECTOR_MEMBERS[s]} w[i] >= sector_lower[s];
+            s.t. sector_constraints_upper{s in SECTORS: sector_upper[s] != Infinity}:
+                sum {i in SECTOR_MEMBERS[s]} w[i] <= sector_upper[s];
+
+        .. code-block:: python
+
+            sectors = set(sector_mapper.values())
+            ampl.set["SECTORS"] = sectors
+            for sector in sectors:
+                ampl.set["SECTOR_MEMBERS"][sector] = [
+                    ticker for ticker, s in sector_mapper.items() if s == sector
+                ]
+            ampl.param["sector_lower"] = sector_lower
+            ampl.param["sector_upper"] = sector_upper
+
+        AMPL version of :func:`pypfopt.EfficientFrontier.add_sector_constraints` with the same interface:
+
+        :param sector_mapper: dict that maps tickers to sectors
+        :type sector_mapper: {str: str} dict
+        :param sector_lower: lower bounds for each sector
+        :type sector_lower: {str: float} dict
+        :param sector_upper: upper bounds for each sector
+        :type sector_upper: {str:float} dict
+        """
+        if np.any(self.weight_bounds[0] < 0):
+            warnings.warn(
+                "Sector constraints may not produce reasonable results if shorts are allowed."
+            )
+
+        ampl = self.ampl
+        sectors = set(sector_mapper.values())
+        ampl.set["SECTORS"] = sectors
+        for sector in sectors:
+            ampl.set["SECTOR_MEMBERS"][sector] = [
+                ticker for ticker, s in sector_mapper.items() if s == sector
+            ]
+        ampl.param["sector_lower"] = sector_lower
+        ampl.param["sector_upper"] = sector_upper
+
+    def _save_portfolio(self, risk_free_rate=None):
         ampl = self.ampl
         self.sigma = ampl.get_value("sqrt(sum {i in A, j in A} w[i] * S[i, j] * w[j])")
         self.mu = ampl.get_value("sum {i in A} mu[i] * w[i]")
@@ -300,6 +650,20 @@ class EfficientFrontierWithAMPL(BaseOptimizer):
         self.weights = np.array([v for _, v in ampl.var["w"].get_values().to_list()])
 
     def portfolio_performance(self, verbose=False, risk_free_rate=0.02):
+        """
+        After optimising, calculate (and optionally print) the performance of the optimal
+        portfolio. Currently calculates expected return, volatility, and the Sharpe ratio.
+
+        :param verbose: whether performance should be printed, defaults to False
+        :type verbose: bool, optional
+        :param risk_free_rate: risk-free rate of borrowing/lending, defaults to 0.02.
+                               The period of the risk-free rate should correspond to the
+                               frequency of expected returns.
+        :type risk_free_rate: float, optional
+        :raises ValueError: if weights have not been calcualted yet
+        :return: expected return, volatility, Sharpe ratio.
+        :rtype: (float, float, float)
+        """
         if self.weights is None:
             raise ValueError("Weights is None")
 

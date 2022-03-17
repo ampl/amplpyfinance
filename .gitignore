@@ -94,6 +94,7 @@ ENV/
 # Temprary files
 *~
 #*
+.DS_Store
 
 /workspace_private
 /register.sh

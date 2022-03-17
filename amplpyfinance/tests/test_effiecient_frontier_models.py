@@ -27,7 +27,7 @@ class TestEfficientFrontierModels(TestBase.TestBase):
 
     def test_min_volatility(self):
         ef = EfficientFrontierWithAMPL(
-            None, self.S, weight_bounds=(None, None), solver="gurobi"
+            None, self.S, weight_bounds=(0, 1), solver="gurobi"
         )
         ef.min_volatility()
         _, sigma1, _ = ef.portfolio_performance(verbose=True)
@@ -37,7 +37,9 @@ class TestEfficientFrontierModels(TestBase.TestBase):
             r"""
             set A ordered;
             param S{A, A};
-            var w{A} >= -1 <= 1;
+            param lb default 0;
+            param ub default 1;
+            var w{A} >= lb <= ub;
             minimize portfolio_variance:
                 sum {i in A, j in A} w[i] * S[i, j] * w[j];
             s.t. portfolio_weights:
@@ -63,16 +65,19 @@ class TestEfficientFrontierModels(TestBase.TestBase):
         ampl = AMPL()
         ampl.eval(
             r"""
+            param risk_free_rate default 0.02;
+
             set A ordered;
             param S{A, A};
             param mu{A} default 0;
-            param risk_free_rate default 0.02;
+
             var k >= 0;
             var z{i in A} >= 0;  # scaled weights
             var w{i in A} = z[i] / k;
+
             minimize portfolio_sharpe:
                 sum {i in A, j in A} z[i] * S[i, j] * z[j];
-            s.t. ms_muz:
+            s.t. muz:
                 sum {i in A} (mu[i] - risk_free_rate) * z[i] = 1;
             s.t. portfolio_weights:
                 sum {i in A}  z[i] = k;
@@ -100,17 +105,21 @@ class TestEfficientFrontierModels(TestBase.TestBase):
         ampl = AMPL()
         ampl.eval(
             r"""
+            param target_volatility;
+            param market_neutral default 0;
             set A ordered;
             param S{A, A};
             param mu{A} default 0;
-            param target_variance;
-            var w{A} >= 0 <= 1;
+            
+            param lb default 0;
+            param ub default 1;
+            var w{A} >= lb <= ub;
             maximize portfolio_return:
                 sum {i in A} mu[i] * w[i];
             s.t. portfolio_variance:
-                sum {i in A, j in A} w[i] * S[i, j] * w[j] <= target_variance;
+                sum {i in A, j in A} w[i] * S[i, j] * w[j] <= target_volatility^2;
             s.t. portfolio_weights:
-                sum {i in A} w[i] = 1;
+                sum {i in A} w[i] = if market_neutral then 0 else 1;
             """
         )
         ampl.set["A"] = ef.tickers
@@ -118,7 +127,8 @@ class TestEfficientFrontierModels(TestBase.TestBase):
             ef.cov_matrix, index=ef.tickers, columns=ef.tickers
         ).unstack(level=0)
         ampl.param["mu"] = ef.expected_returns
-        ampl.param["target_variance"] = 0.15**2
+        ampl.param["target_volatility"] = 0.15
+        ampl.param["market_neutral"] = False
         ampl.option["solver"] = "gurobi"
         ampl.solve()
         weights2, mu2, sigma2, sharpe2 = save_portfolio(ampl)
@@ -126,32 +136,36 @@ class TestEfficientFrontierModels(TestBase.TestBase):
         self.assertLessEqual(abs(mu1 - mu2), EPS)
         self.assertLessEqual(abs(sigma1 - sigma2), EPS)
         self.assertLessEqual(abs(sharpe1 - sharpe2), EPS)
-        self.assertEqualWeights(ef.clean_weights(), weights2, EPS)
+        self.assertEqualWeights(ef.clean_weights(), weights2, EPS * 10)
 
     def test_efficient_risk_l2reg(self):
         ef = EfficientFrontierWithAMPL(
             self.mu, self.S, solver="gurobi", solver_options="outlev=0"
         )
         ef.ampl.param["gamma"] = 0.2
-        ef.efficient_risk(target_volatility=0.15)
+        ef.efficient_risk(target_volatility=0.15, market_neutral=False)
         mu1, sigma1, sharpe1 = ef.portfolio_performance(verbose=True)
 
         ampl = AMPL()
         ampl.eval(
             r"""
+            param target_volatility;
+            param market_neutral default 0;
             set A ordered;
             param S{A, A};
             param mu{A} default 0;
-            param target_variance;
-            var w{A} >= 0 <= 1;
+            
+            param lb default 0;
+            param ub default 1;
+            var w{A} >= lb <= ub;
             param gamma default 0;
             var l2_reg = gamma * sum{i in A} w[i] * w[i];
             maximize portfolio_return:
                 -l2_reg + sum {i in A} mu[i] * w[i];
             s.t. portfolio_variance:
-                sum {i in A, j in A} w[i] * S[i, j] * w[j] <= target_variance;
+                sum {i in A, j in A} w[i] * S[i, j] * w[j] <= target_volatility^2;
             s.t. portfolio_weights:
-                sum {i in A} w[i] = 1;
+                sum {i in A} w[i] = if market_neutral then 0 else 1;
             """
         )
         ampl.set["A"] = ef.tickers
@@ -159,7 +173,8 @@ class TestEfficientFrontierModels(TestBase.TestBase):
             ef.cov_matrix, index=ef.tickers, columns=ef.tickers
         ).unstack(level=0)
         ampl.param["mu"] = ef.expected_returns
-        ampl.param["target_variance"] = 0.15**2
+        ampl.param["target_volatility"] = 0.15
+        ampl.param["market_neutral"] = False
         ampl.param["gamma"] = 0.2
         ampl.option["solver"] = "gurobi"
         ampl.option["gurobi_options"] = "outlev=0"
@@ -181,17 +196,23 @@ class TestEfficientFrontierModels(TestBase.TestBase):
         ampl = AMPL()
         ampl.eval(
             r"""
+            param target_return;
+            param market_neutral default 0;
+
             set A ordered;
             param S{A, A};
             param mu{A} default 0;
-            param target_return;
-            var w{A} >= -1 <= 1;
+
+            param lb default 0;
+            param ub default 1;
+            var w{A} >= lb <= ub;
+
             minimize portfolio_variance:
                 sum {i in A, j in A} w[i] * S[i, j] * w[j];
             s.t. portfolio__return:
                 sum {i in A} mu[i] * w[i] >= target_return;
             s.t. portfolio_weights:
-                sum {i in A} w[i] = 0;
+                sum {i in A} w[i] = if market_neutral then 0 else 1;
             """
         )
         ampl.set["A"] = ef.tickers
@@ -200,6 +221,8 @@ class TestEfficientFrontierModels(TestBase.TestBase):
         ).unstack(level=0)
         ampl.param["mu"] = ef.expected_returns
         ampl.param["target_return"] = 0.07
+        ampl.param["market_neutral"] = True
+        ampl.param["lb"] = -1
         ampl.option["solver"] = "gurobi"
         ampl.solve()
         weights2, mu2, sigma2, sharpe2 = save_portfolio(ampl)
@@ -253,7 +276,7 @@ class TestEfficientFrontierModels(TestBase.TestBase):
 
     def test_max_quadratic_utility(self):
         ef = EfficientFrontierWithAMPL(
-            self.mu, self.S, weight_bounds=(None, None), solver="gurobi"
+            self.mu, self.S, weight_bounds=(0, 1), solver="gurobi"
         )
         ef.max_quadratic_utility(risk_aversion=2, market_neutral=False)
         mu1, sigma1, sharpe1 = ef.portfolio_performance(verbose=True)
@@ -261,16 +284,22 @@ class TestEfficientFrontierModels(TestBase.TestBase):
         ampl = AMPL()
         ampl.eval(
             r"""
+            param risk_aversion default 1;
+            param market_neutral default 0;
+
             set A ordered;
             param S{A, A};
             param mu{A} default 0;
-            param risk_aversion default 1;
-            var w{A} >= -1 <= 1;
+            
+            param lb default 0;
+            param ub default 1;
+            var w{A} >= lb <= ub;
+
             maximize quadratic_utility:
-                sum {i in A} mu[i] * w[i] 
+                sum {i in A} mu[i] * w[i]
                 - 0.5 * risk_aversion * sum {i in A, j in A} w[i] * S[i, j] * w[j];
             s.t. portfolio_weights:
-                sum {i in A} w[i] = 1;
+                sum {i in A} w[i] = if market_neutral then 0 else 1;
             """
         )
         ampl.set["A"] = ef.tickers
@@ -279,6 +308,7 @@ class TestEfficientFrontierModels(TestBase.TestBase):
         ).unstack(level=0)
         ampl.param["mu"] = ef.expected_returns
         ampl.param["risk_aversion"] = 2
+        ampl.param["market_neutral"] = False
         ampl.option["solver"] = "gurobi"
         ampl.solve()
         weights2, mu2, sigma2, sharpe2 = save_portfolio(ampl)

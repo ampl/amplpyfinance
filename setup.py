@@ -34,7 +34,9 @@ setup(
     license="MIT",
     platforms="any",
     author="Filipe Brandão",
-    author_email="fdabrandao@ampl.com",
+    author_email="fdabrandao@gmail.com",
+    maintainer="Filipe Brandão",
+    maintainer_email="fdabrandao@ampl.com",
     url="http://ampl.com/",
     download_url="https://github.com/ampl/amplpy/tree/master/amplpyfinance",
     classifiers=[

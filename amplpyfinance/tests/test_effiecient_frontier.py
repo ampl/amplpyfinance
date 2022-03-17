@@ -212,7 +212,7 @@ class TestEfficientFrontierWithAMPL(TestBase.TestBase):
             solve nonconvex_objective;
             """
         )
-        ef2.save_portfolio()
+        ef2._save_portfolio()
 
         mu1, sigma1, sharpe1 = ef1.portfolio_performance(verbose=True)
         mu2, sigma2, sharpe2 = ef2.portfolio_performance(verbose=True)

@@ -79,6 +79,7 @@ class TestBase(unittest.TestCase):
             weights1 = weights1.values()
         if not isinstance(weights2, list):
             weights2 = weights2.values()
+        print([abs(w1 - w2) > eps for (w1, w2) in zip(weights1, weights2)])
         self.assertEqual(
             sum(abs(w1 - w2) > eps for (w1, w2) in zip(weights1, weights2)),
             0,
