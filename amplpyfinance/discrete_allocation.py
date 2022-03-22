@@ -1,14 +1,16 @@
-from pypfopt import DiscreteAllocation
 from pypfopt import exceptions
 from amplpy import AMPL
+import pypfopt
 import collections
 
 
-class DiscreteAllocationWithAMPL(DiscreteAllocation):
+class DiscreteAllocation(pypfopt.DiscreteAllocation):
     """
     Generate a discrete portfolio allocation from continuous weights.
 
-    AMPL version of :func:`pypfopt.DiscreteAllocation` with similar interface.
+    AMPL version of :class:`pypfopt.DiscreteAllocation` with similar interface.
+    This class is also available under the alias :class:`amplpyfinance.DiscreteAllocationWithAMPL`
+    in order to distinguish from :class:`pypfopt.DiscreteAllocation` if used together.
 
     Instance variables:
 
@@ -137,7 +139,7 @@ class DiscreteAllocationWithAMPL(DiscreteAllocation):
 
             if verbose:
                 print("\nAllocating long sub-portfolio:")
-            da1 = DiscreteAllocationWithAMPL(
+            da1 = DiscreteAllocation(
                 longs, self.latest_prices[longs.keys()], total_portfolio_value=long_val
             )
             long_alloc, long_leftover = da1.lp_portfolio(
@@ -146,7 +148,7 @@ class DiscreteAllocationWithAMPL(DiscreteAllocation):
 
             if verbose:
                 print("\nAllocating short sub-portfolio:")
-            da2 = DiscreteAllocationWithAMPL(
+            da2 = DiscreteAllocation(
                 shorts,
                 self.latest_prices[shorts.keys()],
                 total_portfolio_value=short_val,

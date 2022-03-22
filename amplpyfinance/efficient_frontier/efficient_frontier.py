@@ -1,17 +1,19 @@
 import warnings
 import numpy as np
 import pandas as pd
-from pypfopt.base_optimizer import BaseOptimizer
+import pypfopt
 from amplpy import AMPL
 
 
-class EfficientFrontierWithAMPL(BaseOptimizer):
+class EfficientFrontier(pypfopt.base_optimizer.BaseOptimizer):
     """
-    An EfficientFrontierWithAMPL object contains multiple
+    An EfficientFrontier object contains multiple
     optimization methods that can be called (corresponding to different objective
     functions) with various parameters.
 
-    AMPL version of :func:`pypfopt.EfficientFrontier` with similar interface.
+    AMPL version of :class:`pypfopt.EfficientFrontier` with similar interface.
+    This class is also available under the alias :class:`amplpyfinance.EfficientFrontierWithAMPL`
+    in order to distinguish from :class:`pypfopt.EfficientFrontier` if used together.
 
     Instance variables:
 
@@ -95,8 +97,8 @@ class EfficientFrontierWithAMPL(BaseOptimizer):
         :raises TypeError: if ``cov_matrix`` is not a dataframe or array
         """
         # Inputs
-        self.cov_matrix = EfficientFrontierWithAMPL._validate_cov_matrix(cov_matrix)
-        self.expected_returns = EfficientFrontierWithAMPL._validate_expected_returns(
+        self.cov_matrix = EfficientFrontier._validate_cov_matrix(cov_matrix)
+        self.expected_returns = EfficientFrontier._validate_expected_returns(
             expected_returns
         )
         self._max_return_value = None

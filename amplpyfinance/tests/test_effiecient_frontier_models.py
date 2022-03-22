@@ -316,7 +316,7 @@ class TestEfficientFrontierModels(TestBase.TestBase):
         self.assertLessEqual(abs(mu1 - mu2), EPS)
         self.assertLessEqual(abs(sigma1 - sigma2), EPS)
         self.assertLessEqual(abs(sharpe1 - sharpe2), EPS)
-        self.assertEqualWeights(ef.clean_weights(), weights2, EPS)
+        self.assertEqualWeights(ef.clean_weights(), weights2, EPS * 10)
 
     def test_sector_constraints(self):
         ef = EfficientFrontierWithAMPL(self.mu, self.S)
@@ -376,7 +376,7 @@ class TestEfficientFrontierModels(TestBase.TestBase):
         self.assertLessEqual(abs(mu1 - mu2), EPS)
         self.assertLessEqual(abs(sigma1 - sigma2), EPS)
         self.assertLessEqual(abs(sharpe1 - sharpe2), EPS)
-        self.assertEqualWeights(ef.clean_weights(), weights2, 1e-4)
+        self.assertEqualWeights(ef.clean_weights(), weights2, EPS * 10)
 
     def test_card_constraints(self):
         ef = EfficientFrontierWithAMPL(self.mu, self.S)

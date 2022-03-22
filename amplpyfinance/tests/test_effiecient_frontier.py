@@ -192,9 +192,9 @@ class TestEfficientFrontierWithAMPL(TestBase.TestBase):
         mu1, sigma1, sharpe1 = ef1.portfolio_performance(verbose=True)
         mu2, sigma2, sharpe2 = ef2.portfolio_performance(verbose=True)
         # The precision is lower with EfficientFrontier.nonconvex_objective
-        self.assertLessEqual(abs(mu1 - mu2), 1e-3)
-        self.assertLessEqual(abs(sigma1 - sigma2), 1e-3)
-        self.assertLessEqual(abs(sharpe1 - sharpe2), 1e-3)
+        self.assertLessEqual(abs(mu1 - mu2), EPS * 10)
+        self.assertLessEqual(abs(sigma1 - sigma2), EPS * 10)
+        self.assertLessEqual(abs(sharpe1 - sharpe2), EPS * 10)
         # self.assertEqualWeights(ef1.clean_weights(), ef2.clean_weights(), EPS)
 
     def test_nonconvex_objective(self):

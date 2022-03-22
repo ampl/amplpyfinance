@@ -1,9 +1,9 @@
-.. _ref::DiscreteAllocationWithAMPL:
+.. _ref::DiscreteAllocation:
 
-DiscreteAllocationWithAMPL
---------------------------
+DiscreteAllocation
+------------------
 
-.. autoclass:: amplpyfinance.DiscreteAllocationWithAMPL
+.. autoclass:: amplpyfinance.DiscreteAllocation
   :member-order: bysource
   :members:
   :undoc-members:

@@ -1,1 +1,1 @@
-from .efficient_frontier import EfficientFrontierWithAMPL
+from .efficient_frontier import EfficientFrontier

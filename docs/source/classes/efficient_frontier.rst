@@ -1,9 +1,9 @@
-.. _ref::EfficientFrontierWithAMPL:
+.. _ref::EfficientFrontier:
 
-EfficientFrontierWithAMPL
--------------------------
+EfficientFrontier
+-----------------
 
-.. autoclass:: amplpyfinance.EfficientFrontierWithAMPL
+.. autoclass:: amplpyfinance.EfficientFrontier
   :member-order: bysource
   :members:
   :undoc-members:
