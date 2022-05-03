@@ -4,6 +4,20 @@ A basic [Docker Compose](https://docs.docker.com/compose/) template for orchestr
 
 Jobs submitted to the flask application are sent to the queue and then processed by one of the optimization workers (docker containers with AMPL and solvers installed) where [amplpyfinance](https://github.com/ampl/amplpyfinance) is used to solve optimization problems.
 
+### Project structure
+
+- [docker-compose.yml](https://github.com/ampl/amplpyfinance/tree/master/deployment/docker/docker-compose.yml): definition of the services involved in this Docker application.
+- [api/](https://github.com/ampl/amplpyfinance/tree/master/deployment/docker/api/)
+  - [Dockerfile](https://github.com/ampl/amplpyfinance/tree/master/deployment/docker/api/Dockerfile): Dockerfile for the Flask application.
+  - [app.py](https://github.com/ampl/amplpyfinance/tree/master/deployment/docker/api/app.py): Flask application.
+  - [requirements.txt](https://github.com/ampl/amplpyfinance/tree/master/deployment/docker/api/requirements.txt): Python requirements for the Flask application.
+- [queue/](https://github.com/ampl/amplpyfinance/tree/master/deployment/docker/queue/)
+  - [Dockerfile](https://github.com/ampl/amplpyfinance/tree/master/deployment/docker/queue/Dockerfile): Dockerfile for Celery and its workers.
+    - This Dockerfile includes the steps to install AMPL and solvers since this needs to be available in the workers.
+  - [tasks.py](https://github.com/ampl/amplpyfinance/tree/master/deployment/docker/queue/tasks.py): definition of Celery tasks and startup handler (used to activate the AMPL license when a new worker starts).
+  - [requirements.txt](https://github.com/ampl/amplpyfinance/tree/master/deployment/docker/queue/requirements.txt): Python requirements for the Celery queue and workers.
+- [client.py](https://github.com/ampl/amplpyfinance/tree/master/deployment/docker/client.py): Python client to submit requests to the application.
+
 ### Installation
 
 ```bash
