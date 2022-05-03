@@ -1,0 +1,67 @@
+version: "3.9"
+services:
+  web:
+    image: amplopt/testing:amplpyfinance-web-v1
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    # restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - redis
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 0.5Gb
+    #volumes: [ './api:/api' ]
+  worker:
+    image: amplopt/testing:amplpyfinance-celery-v1
+    build:
+      context: ./queue
+      dockerfile: Dockerfile
+    environment:
+      CELERY_BROKER_URL: redis://redis
+      CELERY_RESULT_BACKEND: redis://redis
+      AMPLKEY_UUID: ${AMPLKEY_UUID}
+    command: celery -A tasks worker -l info -E
+    depends_on:
+      - redis
+    deploy:
+      mode: replicated
+      replicas: 2
+      resources:
+        limits:
+          cpus: '1'
+          memory: 2Gb
+    #volumes: [ './queue:/queue' ]
+  monitor:
+    image: amplopt/testing:amplpyfinance-celery-v1
+    build:
+      context: ./queue
+      dockerfile: Dockerfile
+    environment:
+      CELERY_BROKER_URL: redis://redis
+      CELERY_RESULT_BACKEND: redis://redis
+    ports:
+      - "5555:5555"
+    command: celery -A tasks flower
+    depends_on:
+      - redis
+      - worker
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 0.5Gb
+    #volumes: [ './queue:/queue' ]
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 0.5Gb

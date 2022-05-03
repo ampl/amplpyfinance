@@ -1,0 +1,10 @@
+version: "3.9"
+services:
+  web:
+    ports:
+      - "8080:80"
+    volumes: [ './api:/api' ]
+    command: ["gunicorn", "--bind", "0.0.0.0:80", "--workers", "1", "app:app", "--reload"]
+  worker:
+    volumes: [ './queue:/queue' ]
+    command: watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery -A tasks worker --concurrency=1 --loglevel=INFO -E
