@@ -2,7 +2,7 @@
 
 A basic [Docker Compose](https://docs.docker.com/compose/) template for orchestrating a [Flask](http://flask.pocoo.org/) application & a [Celery](http://www.celeryproject.org/) queue with [Redis](https://redis.io/).
 
-Jobs submited to the flask application are sent to the queue and then processed by one of the optimization workers (docker containers with AMPL and solvers installed) where [amplpyfinance](https://github.com/ampl/amplpyfinance) is used to solve optimization problems.
+Jobs submitted to the flask application are sent to the queue and then processed by one of the optimization workers (docker containers with AMPL and solvers installed) where [amplpyfinance](https://github.com/ampl/amplpyfinance) is used to solve optimization problems.
 
 ### Installation
 

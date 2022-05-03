@@ -81,6 +81,8 @@ if __name__ == "__main__":
     host, port = "127.0.0.1", 80
     if len(sys.argv) >= 2:
         host = sys.argv[1]
+        if ':' in host:
+            host, port = host.split(':')
     if len(sys.argv) >= 3:
         port = sys.argv[2]
 

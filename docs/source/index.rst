@@ -1,4 +1,4 @@
-.. _amplapi:
+.. _home:
 
 Financial Portfolio Optimization with amplpy
 --------------------------------------------
@@ -6,8 +6,8 @@ Financial Portfolio Optimization with amplpy
 This package replicates some financial portfolio optimization models 
 from `pypfopt <https://github.com/robertmartin8/PyPortfolioOpt>`_
 using `amplpy <https://github.com/ampl/amplpy>`_ and provides a similar
-interface. The main purpose of this project is to ilustrate how to use
-**amplpy** with financial models.
+interface. The main purpose of this project is to illustrate how to use
+``amplpy`` with financial models and how to :ref:`deploy containerized applications<deployment>` using it.
 
 Notebooks
 `````````
@@ -48,3 +48,5 @@ Classes
 
    classes/efficient_frontier
    classes/discrete_allocation
+   deployment
+

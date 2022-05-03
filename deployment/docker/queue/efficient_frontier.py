@@ -17,7 +17,7 @@ class InputData:
         self.target_volatility = data.get("target_volatility", None)
         self.target_return = data.get("target_return", None)
         self.market_neutral = data.get("market_neutral", False)
-        self.card = data.get("card", False)
+        self.card = data.get("card", None)
         self.S = pd.DataFrame(data["S"], index=self.tickers, columns=self.tickers)
 
     def __repr__(self):
