@@ -5,13 +5,13 @@ RUN apt-get update && apt-get install -y curl
 # Build arguments
 ARG MODULES_URL=https://ampl.com/dl/modules
 # Download ampl-module.linux64.tgz
-RUN cd /opt/ && curl -O ${MODULES_URL}/ampl-module.linux64.tgz && \
+RUN cd /opt/ && curl -OL ${MODULES_URL}/ampl-module.linux64.tgz && \
     tar xzvf ampl-module.linux64.tgz && rm ampl-module.linux64.tgz
 # Download gurobi-module.linux64.tgz
-RUN cd /opt/ && curl -O ${MODULES_URL}/gurobi-module.linux64.tgz && \
+RUN cd /opt/ && curl -OL ${MODULES_URL}/gurobi-module.linux64.tgz && \
     tar xzvf gurobi-module.linux64.tgz && rm gurobi-module.linux64.tgz
 # Download coin-module.linux64.tgz
-RUN cd /opt/ && curl -O ${MODULES_URL}/coin-module.linux64.tgz && \
+RUN cd /opt/ && curl -OL ${MODULES_URL}/coin-module.linux64.tgz && \
     tar xzvf coin-module.linux64.tgz && rm coin-module.linux64.tgz
 # Add installation directory to the environment variable PATH
 ENV PATH="/opt/ampl.linux-intel64/:${PATH}"
