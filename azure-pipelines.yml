@@ -1,10 +1,10 @@
 jobs:
 - job: test
-  pool: {vmImage: 'macOS-latest'}
+  pool: {vmImage: 'ubuntu-latest'}
   steps:
     - task: UsePythonVersion@0
       inputs:
-        versionSpec: '3.x'
+        versionSpec: '3.10'
     - bash: python --version
       displayName: Check python version
     - bash: |
