@@ -1,0 +1,16 @@
+jobs:
+- job: linux
+  pool: {vmImage: 'Ubuntu-20.04'}
+  steps:
+    - task: UsePythonVersion@0
+    - bash: |
+        set -o errexit
+        python3 -m pip install -r requirements.txt
+        python3 -m amplpy.modules install gurobi
+      displayName: Install dependencies
+    - bash: |
+        python3 -m pip install .
+      displayName: Install amplpyfinance
+    - bash: |
+        python3 -m amplpyfinance.tests
+      displayName: Test
