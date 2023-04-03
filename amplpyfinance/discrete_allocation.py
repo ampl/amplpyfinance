@@ -156,6 +156,7 @@ class DiscreteAllocation(pypfopt.DiscreteAllocation):
             short_alloc, short_leftover = da2.lp_portfolio(
                 verbose=verbose, solver=solver, solver_options=solver_options
             )
+            self._ampl = da2._ampl
             short_alloc = {t: -w for t, w in short_alloc.items()}
 
             # Combine and return
@@ -196,6 +197,7 @@ class DiscreteAllocation(pypfopt.DiscreteAllocation):
         if solver_options:
             ampl.option[f"{solver}_options"] = solver_options
         ampl.solve()
+        self._ampl = ampl
         if ampl.get_value("solve_result") != "solved":
             raise exceptions.OptimizationError(
                 "Failed to solve. Please check the solver log"

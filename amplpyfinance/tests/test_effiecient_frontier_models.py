@@ -30,6 +30,7 @@ class TestEfficientFrontierModels(TestBase.TestBase):
             None, self.S, weight_bounds=(0, 1), solver="gurobi"
         )
         ef.min_volatility()
+        self.assertEqual(ef.ampl.get_value("solve_result"), "solved")
         _, sigma1, _ = ef.portfolio_performance(verbose=True)
 
         ampl = AMPL()
@@ -52,6 +53,7 @@ class TestEfficientFrontierModels(TestBase.TestBase):
         ).unstack(level=0)
         ampl.option["solver"] = "gurobi"
         ampl.solve()
+        self.assertEqual(ampl.get_value("solve_result"), "solved")
         weights2, _, sigma2, _ = save_portfolio(ampl)
 
         self.assertLessEqual(abs(sigma1 - sigma2), EPS)
@@ -60,6 +62,7 @@ class TestEfficientFrontierModels(TestBase.TestBase):
     def test_max_sharpe(self):
         ef = EfficientFrontierWithAMPL(self.mu, self.S, solver="gurobi")
         ef.max_sharpe()
+        self.assertEqual(ef.ampl.get_value("solve_result"), "solved")
         mu1, sigma1, sharpe1 = ef.portfolio_performance(verbose=True)
 
         ampl = AMPL()
@@ -90,6 +93,7 @@ class TestEfficientFrontierModels(TestBase.TestBase):
         ampl.param["mu"] = ef.expected_returns
         ampl.option["solver"] = "gurobi"
         ampl.solve()
+        self.assertEqual(ampl.get_value("solve_result"), "solved")
         weights2, mu2, sigma2, sharpe2 = save_portfolio(ampl)
 
         self.assertLessEqual(abs(mu1 - mu2), EPS)
@@ -100,6 +104,7 @@ class TestEfficientFrontierModels(TestBase.TestBase):
     def test_efficient_risk(self):
         ef = EfficientFrontierWithAMPL(self.mu, self.S, solver="gurobi")
         ef.efficient_risk(target_volatility=0.15)
+        self.assertEqual(ef.ampl.get_value("solve_result"), "solved")
         mu1, sigma1, sharpe1 = ef.portfolio_performance(verbose=True)
 
         ampl = AMPL()
@@ -131,6 +136,7 @@ class TestEfficientFrontierModels(TestBase.TestBase):
         ampl.param["market_neutral"] = False
         ampl.option["solver"] = "gurobi"
         ampl.solve()
+        self.assertEqual(ampl.get_value("solve_result"), "solved")
         weights2, mu2, sigma2, sharpe2 = save_portfolio(ampl)
 
         self.assertLessEqual(abs(mu1 - mu2), EPS)
@@ -144,6 +150,7 @@ class TestEfficientFrontierModels(TestBase.TestBase):
         )
         ef.ampl.param["gamma"] = 0.2
         ef.efficient_risk(target_volatility=0.15, market_neutral=False)
+        self.assertEqual(ef.ampl.get_value("solve_result"), "solved")
         mu1, sigma1, sharpe1 = ef.portfolio_performance(verbose=True)
 
         ampl = AMPL()
@@ -179,6 +186,7 @@ class TestEfficientFrontierModels(TestBase.TestBase):
         ampl.option["solver"] = "gurobi"
         ampl.option["gurobi_options"] = "outlev=0"
         ampl.solve()
+        self.assertEqual(ampl.get_value("solve_result"), "solved")
         weights2, mu2, sigma2, sharpe2 = save_portfolio(ampl)
 
         self.assertLessEqual(abs(mu1 - mu2), EPS)
@@ -191,6 +199,7 @@ class TestEfficientFrontierModels(TestBase.TestBase):
             self.mu, self.S, weight_bounds=(None, None), solver="gurobi"
         )
         ef.efficient_return(target_return=0.07, market_neutral=True)
+        self.assertEqual(ef.ampl.get_value("solve_result"), "solved")
         mu1, sigma1, sharpe1 = ef.portfolio_performance(verbose=True)
 
         ampl = AMPL()
@@ -225,6 +234,7 @@ class TestEfficientFrontierModels(TestBase.TestBase):
         ampl.param["lb"] = -1
         ampl.option["solver"] = "gurobi"
         ampl.solve()
+        self.assertEqual(ampl.get_value("solve_result"), "solved")
         weights2, mu2, sigma2, sharpe2 = save_portfolio(ampl)
 
         self.assertLessEqual(abs(mu1 - mu2), EPS)
@@ -238,6 +248,7 @@ class TestEfficientFrontierModels(TestBase.TestBase):
         )
         ef.ampl.param["gamma"] = 0.2
         ef.efficient_return(target_return=0.07, market_neutral=True)
+        self.assertEqual(ef.ampl.get_value("solve_result"), "solved")
         mu1, sigma1, sharpe1 = ef.portfolio_performance(verbose=True)
 
         ampl = AMPL()
@@ -267,6 +278,7 @@ class TestEfficientFrontierModels(TestBase.TestBase):
         ampl.param["target_return"] = 0.07
         ampl.option["solver"] = "gurobi"
         ampl.solve()
+        self.assertEqual(ampl.get_value("solve_result"), "solved")
         weights2, mu2, sigma2, sharpe2 = save_portfolio(ampl)
 
         self.assertLessEqual(abs(mu1 - mu2), EPS)
@@ -279,6 +291,7 @@ class TestEfficientFrontierModels(TestBase.TestBase):
             self.mu, self.S, weight_bounds=(0, 1), solver="gurobi"
         )
         ef.max_quadratic_utility(risk_aversion=2, market_neutral=False)
+        self.assertEqual(ef.ampl.get_value("solve_result"), "solved")
         mu1, sigma1, sharpe1 = ef.portfolio_performance(verbose=True)
 
         ampl = AMPL()
@@ -311,6 +324,7 @@ class TestEfficientFrontierModels(TestBase.TestBase):
         ampl.param["market_neutral"] = False
         ampl.option["solver"] = "gurobi"
         ampl.solve()
+        self.assertEqual(ampl.get_value("solve_result"), "solved")
         weights2, mu2, sigma2, sharpe2 = save_portfolio(ampl)
 
         self.assertLessEqual(abs(mu1 - mu2), EPS)
@@ -322,6 +336,7 @@ class TestEfficientFrontierModels(TestBase.TestBase):
         ef = EfficientFrontierWithAMPL(self.mu, self.S)
         ef.add_sector_constraints(sector_mapper, sector_lower, sector_upper)
         ef.efficient_risk(target_volatility=0.15)
+        self.assertEqual(ef.ampl.get_value("solve_result"), "solved")
         mu1, sigma1, sharpe1 = ef.portfolio_performance(verbose=True)
 
         ampl = AMPL()
@@ -371,6 +386,7 @@ class TestEfficientFrontierModels(TestBase.TestBase):
         ampl.param["sector_upper"] = sector_upper
         ampl.option["solver"] = "gurobi"
         ampl.solve()
+        self.assertEqual(ampl.get_value("solve_result"), "solved")
         weights2, mu2, sigma2, sharpe2 = save_portfolio(ampl)
 
         self.assertLessEqual(abs(mu1 - mu2), EPS)
@@ -382,6 +398,7 @@ class TestEfficientFrontierModels(TestBase.TestBase):
         ef = EfficientFrontierWithAMPL(self.mu, self.S)
         ef.ampl.param["card_ub"] = 3
         ef.efficient_risk(target_volatility=0.15)
+        self.assertEqual(ef.ampl.get_value("solve_result"), "solved")
         mu1, sigma1, sharpe1 = ef.portfolio_performance(verbose=True)
 
         ampl = AMPL()
@@ -426,6 +443,7 @@ class TestEfficientFrontierModels(TestBase.TestBase):
         ampl.param["market_neutral"] = False
         ampl.option["solver"] = "gurobi"
         ampl.solve()
+        self.assertEqual(ampl.get_value("solve_result"), "solved")
         weights2, mu2, sigma2, sharpe2 = save_portfolio(ampl)
 
         self.assertLessEqual(len([w for w in weights2 if w > EPS]), 3)

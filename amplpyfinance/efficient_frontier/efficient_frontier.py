@@ -127,6 +127,7 @@ class EfficientFrontier(pypfopt.base_optimizer.BaseOptimizer):
         self.weight_bounds = weight_bounds
 
         self.ampl = AMPL()
+        self._set_solver()
         ampl = self.ampl
         model = r"""
         set A ordered;         # assets
@@ -275,15 +276,22 @@ class EfficientFrontier(pypfopt.base_optimizer.BaseOptimizer):
         else:
             raise TypeError("cov_matrix is not a dataframe or array")
 
+    def _set_solver(self):
+        self.ampl.option["solver"] = self.solver
+        if self.solver and self.solver_options:
+            self.ampl.option[f"{self.solver}_options"] = self.solver_options
+
     def _solve(self, problem):
         ampl = self.ampl
         ampl.eval(f"problem {problem};")
-        ampl.option["solver"] = self.solver
-        if self.solver and self.solver_options:
-            ampl.option[f"{self.solver}_options"] = self.solver_options
+        self._set_solver()
         if ampl.param["card_ub"].value() >= len(self.tickers):
             ampl.eval("fix {i in A} y[i] := 1;")
         ampl.solve()
+        if ampl.get_value("solve_result") != "solved":
+            raise exceptions.OptimizationError(
+                "Failed to solve. Please check the solver log"
+            )
 
     def _max_return(self):
         """

@@ -10,6 +10,7 @@ class TestDiscreteAllocationWithAMPL(TestBase.TestBase):
     def test_lp_portfolio(self):
         ef = EfficientFrontierWithAMPL(None, self.S, weight_bounds=(None, None))
         ef.min_volatility()
+        self.assertEqual(ef.ampl.get_value("solve_result"), "solved")
         weights = ef.clean_weights()
         latest_prices = self.prices.iloc[-1]  # prices as of the day you are allocating
 
@@ -24,6 +25,7 @@ class TestDiscreteAllocationWithAMPL(TestBase.TestBase):
             weights, latest_prices, total_portfolio_value=20000, short_ratio=0.3
         )
         alloc2, leftover2 = da2.lp_portfolio(solver="gurobi", verbose=True)
+        self.assertEqual(da2._ampl.get_value("solve_result"), "solved")
         print(f"Discrete allocation performed with ${leftover2:.2f} leftover")
         print(alloc2)
 
@@ -33,6 +35,7 @@ class TestDiscreteAllocationWithAMPL(TestBase.TestBase):
     def test_reinvest(self):
         ef = EfficientFrontierWithAMPL(None, self.S, weight_bounds=(None, None))
         ef.min_volatility()
+        self.assertEqual(ef.ampl.get_value("solve_result"), "solved")
         weights = ef.clean_weights()
         latest_prices = self.prices.iloc[-1]  # prices as of the day you are allocating
 
@@ -51,6 +54,7 @@ class TestDiscreteAllocationWithAMPL(TestBase.TestBase):
         alloc2, leftover2 = da2.lp_portfolio(
             solver="gurobi", reinvest=True, verbose=True
         )
+        self.assertEqual(da2._ampl.get_value("solve_result"), "solved")
         print(f"Discrete allocation performed with ${leftover2:.2f} leftover")
         print(alloc2)
 

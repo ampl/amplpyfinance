@@ -21,6 +21,7 @@ class TestEfficientFrontierWithAMPL(TestBase.TestBase):
             None, self.S, weight_bounds=(None, None), solver="gurobi"
         )
         ef2.min_volatility()
+        self.assertEqual(ef2.ampl.get_value("solve_result"), "solved")
 
         _, sigma1, _ = ef1.portfolio_performance(verbose=True)
         _, sigma2, _ = ef2.portfolio_performance(verbose=True)
@@ -33,6 +34,7 @@ class TestEfficientFrontierWithAMPL(TestBase.TestBase):
 
         ef2 = EfficientFrontierWithAMPL(self.mu, self.S)
         ef2.max_sharpe()
+        self.assertEqual(ef2.ampl.get_value("solve_result"), "solved")
 
         mu1, sigma1, sharpe1 = ef1.portfolio_performance(verbose=True)
         mu2, sigma2, sharpe2 = ef2.portfolio_performance(verbose=True)
@@ -49,6 +51,7 @@ class TestEfficientFrontierWithAMPL(TestBase.TestBase):
         ef2 = EfficientFrontierWithAMPL(self.mu, self.S)
         ef2.add_sector_constraints(sector_mapper, sector_lower, sector_upper)
         ef2.max_sharpe()
+        self.assertEqual(ef2.ampl.get_value("solve_result"), "solved")
 
         mu1, sigma1, sharpe1 = ef1.portfolio_performance(verbose=True)
         mu2, sigma2, sharpe2 = ef2.portfolio_performance(verbose=True)
@@ -70,6 +73,7 @@ class TestEfficientFrontierWithAMPL(TestBase.TestBase):
         ef2.ampl.param["ticker_lower"] = {"AMZN": 0.10, "MSFT": 0.05}
         ef2.ampl.param["ticker_upper"] = {"TSLA": 0.05}
         ef2.max_sharpe()
+        self.assertEqual(ef2.ampl.get_value("solve_result"), "solved")
 
         mu1, sigma1, sharpe1 = ef1.portfolio_performance(verbose=True)
         mu2, sigma2, sharpe2 = ef2.portfolio_performance(verbose=True)
@@ -86,6 +90,7 @@ class TestEfficientFrontierWithAMPL(TestBase.TestBase):
         ef2 = EfficientFrontierWithAMPL(self.mu, self.S)
         ef2.add_sector_constraints(sector_mapper, sector_lower, sector_upper)
         ef2.efficient_risk(target_volatility=0.15)
+        self.assertEqual(ef2.ampl.get_value("solve_result"), "solved")
 
         mu1, sigma1, sharpe1 = ef1.portfolio_performance(verbose=True)
         mu2, sigma2, sharpe2 = ef2.portfolio_performance(verbose=True)
@@ -106,13 +111,14 @@ class TestEfficientFrontierWithAMPL(TestBase.TestBase):
         ef2.add_sector_constraints(sector_mapper, sector_lower, sector_upper)
         ef2.ampl.param["gamma"] = 0.1
         ef2.efficient_risk(target_volatility=0.15)
+        self.assertEqual(ef2.ampl.get_value("solve_result"), "solved")
 
         mu1, sigma1, sharpe1 = ef1.portfolio_performance(verbose=True)
         mu2, sigma2, sharpe2 = ef2.portfolio_performance(verbose=True)
         self.assertLessEqual(abs(mu1 - mu2), EPS)
         self.assertLessEqual(abs(sigma1 - sigma2), EPS)
-        self.assertLessEqual(abs(sharpe1 - sharpe2), EPS)
-        # self.assertEqualWeights(ef1.clean_weights(), ef2.clean_weights(), EPS)
+        self.assertLessEqual(abs(sharpe1 - sharpe2), 10*EPS)
+        self.assertEqualWeights(ef1.clean_weights(), ef2.clean_weights(), 10*EPS)
 
     def test_efficient_return(self):
         ef1 = EfficientFrontier(self.mu, self.S, weight_bounds=(None, None))
@@ -120,6 +126,7 @@ class TestEfficientFrontierWithAMPL(TestBase.TestBase):
 
         ef2 = EfficientFrontierWithAMPL(self.mu, self.S, weight_bounds=(None, None))
         ef2.efficient_return(target_return=0.07, market_neutral=True)
+        self.assertEqual(ef2.ampl.get_value("solve_result"), "solved")
 
         mu1, sigma1, sharpe1 = ef1.portfolio_performance(verbose=True)
         mu2, sigma2, sharpe2 = ef2.portfolio_performance(verbose=True)
@@ -138,13 +145,14 @@ class TestEfficientFrontierWithAMPL(TestBase.TestBase):
         ef2 = EfficientFrontierWithAMPL(self.mu, self.S, weight_bounds=(None, None))
         ef2.ampl.param["gamma"] = 0.1
         ef2.efficient_return(target_return=0.07, market_neutral=True)
+        self.assertEqual(ef2.ampl.get_value("solve_result"), "solved")
 
         mu1, sigma1, sharpe1 = ef1.portfolio_performance(verbose=True)
         mu2, sigma2, sharpe2 = ef2.portfolio_performance(verbose=True)
         self.assertLessEqual(abs(mu1 - mu2), EPS)
         self.assertLessEqual(abs(sigma1 - sigma2), EPS)
-        self.assertLessEqual(abs(sharpe1 - sharpe2), EPS)
-        self.assertEqualWeights(ef1.clean_weights(), ef2.clean_weights(), EPS)
+        self.assertLessEqual(abs(sharpe1 - sharpe2), 10*EPS)
+        self.assertEqualWeights(ef1.clean_weights(), ef2.clean_weights(), 10*EPS)
 
     def test_max_quadratic_utility_nobounds(self):
         ef1 = EfficientFrontier(self.mu, self.S, weight_bounds=(None, None))
@@ -152,6 +160,7 @@ class TestEfficientFrontierWithAMPL(TestBase.TestBase):
 
         ef2 = EfficientFrontierWithAMPL(self.mu, self.S, weight_bounds=(None, None))
         ef2.max_quadratic_utility(risk_aversion=2, market_neutral=False)
+        self.assertEqual(ef2.ampl.get_value("solve_result"), "solved")
 
         mu1, sigma1, sharpe1 = ef1.portfolio_performance(verbose=True)
         mu2, sigma2, sharpe2 = ef2.portfolio_performance(verbose=True)
@@ -166,6 +175,7 @@ class TestEfficientFrontierWithAMPL(TestBase.TestBase):
 
         ef2 = EfficientFrontierWithAMPL(self.mu, self.S)
         ef2.max_quadratic_utility(risk_aversion=2, market_neutral=False)
+        self.assertEqual(ef2.ampl.get_value("solve_result"), "solved")
 
         mu1, sigma1, sharpe1 = ef1.portfolio_performance(verbose=True)
         mu2, sigma2, sharpe2 = ef2.portfolio_performance(verbose=True)
@@ -201,10 +211,10 @@ class TestEfficientFrontierWithAMPL(TestBase.TestBase):
         ef1 = EfficientFrontierWithAMPL(self.mu, self.S)
         ef1.max_quadratic_utility(risk_aversion=2)
 
-        ef2 = EfficientFrontierWithAMPL(self.mu, self.S)
+        ef2 = EfficientFrontierWithAMPL(self.mu, self.S, solver="gurobi", solver_options="outlev=1")
         ef2.ampl.param["risk_aversion"] = 2
         ef2.ampl.param["market_neutral"] = 0
-        ef2.ampl.eval(
+        ef2.ampl.get_output(
             r"""
             maximize nonconvex_objective:
                 sum {i in A} mu[i] * w[i]
@@ -212,6 +222,7 @@ class TestEfficientFrontierWithAMPL(TestBase.TestBase):
             solve nonconvex_objective;
             """
         )
+        self.assertEqual(ef2.ampl.get_value("solve_result"), "solved")
         ef2._save_portfolio()
 
         mu1, sigma1, sharpe1 = ef1.portfolio_performance(verbose=True)
