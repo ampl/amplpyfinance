@@ -66,10 +66,12 @@ class TestBase(unittest.TestCase):
                 "F",
                 "TSLA",
             ]
-            ohlc = yf.download(tickers, period="max")
+            ohlc = yf.download(tickers, start="1962-01-02", end="2023-04-03", period="max")
+            # print(">>", min(ohlc.index), max(ohlc.index))
             CACHE["prices"] = ohlc["Adj Close"].dropna(how="all")
             CACHE["mu"] = expected_returns.capm_return(CACHE["prices"])
             CACHE["S"] = risk_models.CovarianceShrinkage(CACHE["prices"]).ledoit_wolf()
+            
         self.prices = CACHE["prices"]
         self.S = CACHE["S"]
         self.mu = CACHE["mu"]

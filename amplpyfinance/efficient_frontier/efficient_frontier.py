@@ -289,7 +289,7 @@ class EfficientFrontier(pypfopt.base_optimizer.BaseOptimizer):
             ampl.eval("fix {i in A} y[i] := 1;")
         ampl.solve()
         if ampl.get_value("solve_result") != "solved":
-            raise exceptions.OptimizationError(
+            raise pypfopt.exceptions.OptimizationError(
                 "Failed to solve. Please check the solver log"
             )
 
