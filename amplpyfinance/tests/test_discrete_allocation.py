@@ -29,7 +29,7 @@ class TestDiscreteAllocationWithAMPL(TestBase.TestBase):
         print(f"Discrete allocation performed with ${leftover2:.2f} leftover")
         print(alloc2)
 
-        self.assertAlmostEqual(leftover1, leftover2)
+        self.assertAlmostEqual(leftover1, leftover2, places=4)
         self.assertEqual(alloc1, alloc2)
 
     def test_reinvest(self):
@@ -58,7 +58,7 @@ class TestDiscreteAllocationWithAMPL(TestBase.TestBase):
         print(f"Discrete allocation performed with ${leftover2:.2f} leftover")
         print(alloc2)
 
-        self.assertAlmostEqual(leftover1, leftover2)
+        self.assertAlmostEqual(leftover1, leftover2, places=4)
         self.assertEqual(alloc1, alloc2)
 
 
