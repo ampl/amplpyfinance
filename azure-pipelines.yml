@@ -1,10 +1,14 @@
 jobs:
-- job: test
+- job: Test
   pool: {vmImage: 'ubuntu-latest'}
+  strategy:
+    matrix:
+      Python 3.10:
+        PYTHON_VERSION: 3.10
   steps:
     - task: UsePythonVersion@0
       inputs:
-        versionSpec: '3.10'
+        versionSpec: $(PYTHON_VERSION)
     - bash: python --version
       displayName: Check python version
     - bash: |
