@@ -1,5 +1,8 @@
 #!/bin/bash
+cd "`dirname "$0"`"
+cd ..
 set -ex
+
 if [ "$#" -eq 0 ]; then
   echo "Usage: $0 <version>"
 else

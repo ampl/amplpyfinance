@@ -97,9 +97,6 @@ ENV/
 .DS_Store
 
 /workspace_private
-/register.sh
-/clear.sh
 /test.py
 /tmp
 /notes.txt
-
