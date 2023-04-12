@@ -1,7 +1,8 @@
-### Financial portfolio optimization with amplpy
+### Financial Portfolio Optimization with amplpy
 
-This package replicates financial portfolio optimization models 
-from [pypfopt](https://github.com/robertmartin8/PyPortfolioOpt) using [amplpy](https://github.com/ampl/amplpy).
+[![Build Status](https://dev.azure.com/ampldev/amplpyfinance/_apis/build/status%2Fampl.amplpyfinance?branchName=master)](https://dev.azure.com/ampldev/amplpyfinance/_build/latest?definitionId=22&branchName=master) [![Test package](https://github.com/ampl/amplpyfinance/actions/workflows/test.yaml/badge.svg)](https://github.com/ampl/amplpyfinance/actions/workflows/test.yaml)
+
+This package replicates some financial portfolio optimization models from [pypfopt](https://github.com/robertmartin8/PyPortfolioOpt) using [amplpy](https://github.com/ampl/amplpy) and provides a similar interface. The main purpose of this project is to illustrate how to use amplpy with financial models and how to [deploy containerized applications](https://amplpyfinance.readthedocs.io/en/latest/deployment.html#deployment) using it.
 
 #### Repositories
 
@@ -21,4 +22,4 @@ $ python -m pip install amplpyfinance
 MIT
 
 ***
-Copyright © 2022-2022 AMPL Optimization inc. All rights reserved.
+Copyright © 2023 AMPL Optimization inc. All rights reserved.
