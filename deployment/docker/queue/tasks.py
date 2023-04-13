@@ -18,10 +18,10 @@ def solve(data) -> dict:
 
 @signals.worker_process_init.connect
 def on_worker_process_init(**kwargs):
+    from amplpy import modules
+
     # Activate the license when the worker starts
     uuid = os.environ.get("AMPLKEY_UUID", None)
     if uuid is not None and uuid != "":
-        _, out, err = run(["amplkey", "activate", "--uuid", uuid])
-        print(f"{out.decode()}\n{err.decode()}")
-    _, out, err = run(["ampl", "-vvq"])
-    print(f"{out.decode()}\n{err.decode()}")
+        modules.activate(uuid)
+    modules.run(["ampl", "-vvq"], verbose=True)

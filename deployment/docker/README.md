@@ -43,10 +43,21 @@ COMPOSE_PROJECT_NAME=amplpyfinance
 ### Build & Launch
 
 ```bash
-$ cd amplpyfinance/deployment
+$ cd amplpyfinance/deployment/docker
 $ export COMPOSE_PROJECT_NAME=amplpyfinance
 $ docker compose up -d --build
 ```
+
+### Client
+
+```bash
+$ python -m venv venv
+$ source venv/bin/activate
+$ python -m pip install -r requirements.txt
+$ python client.py
+```
+
+Check the status at: http://127.0.0.1:5555/tasks
 
 ### Enable hot code reload
 

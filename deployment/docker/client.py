@@ -1,3 +1,6 @@
+from pypfopt import expected_returns, risk_models
+import yfinance as yf
+import pandas as pd
 import requests
 import pandas as pd
 import numpy as np
@@ -34,11 +37,6 @@ def solve(method, endpoint, tickers, mu, S, problem_type):
         pass
     print(response.content.decode())
     # print(response.json())
-
-
-from pypfopt import expected_returns, risk_models
-import yfinance as yf
-import pandas as pd
 
 
 def list_sp500():
@@ -81,8 +79,8 @@ if __name__ == "__main__":
     host, port = "127.0.0.1", 80
     if len(sys.argv) >= 2:
         host = sys.argv[1]
-        if ':' in host:
-            host, port = host.split(':')
+        if ":" in host:
+            host, port = host.split(":")
     if len(sys.argv) >= 3:
         port = sys.argv[2]
 
@@ -92,7 +90,7 @@ if __name__ == "__main__":
 
     # solve("PUT", f"http://{host}:{port}/solve", tickers, mu, S, "min_volatility")
 
-    for i in range(10):
+    for i in range(4):
         solve("PUT", f"http://{host}:{port}/solve", tickers, mu, S, "min_volatility")
         solve("PUT", f"http://{host}:{port}/solve", tickers, mu, S, "efficient_risk")
         solve("PUT", f"http://{host}:{port}/solve", tickers, mu, S, "efficient_return")

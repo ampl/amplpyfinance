@@ -1,0 +1,5 @@
+pandas
+requests
+PyPortfolioOpt>=1.5.1
+yfinance>=0.1.70
+scikit-learn>=1.0.2
