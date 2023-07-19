@@ -50,7 +50,7 @@ class TestEfficientFrontierModels(TestBase.TestBase):
         ampl.set["A"] = ef.tickers
         ampl.param["S"] = pd.DataFrame(
             ef.cov_matrix, index=ef.tickers, columns=ef.tickers
-        ).unstack(level=0)
+        )
         ampl.option["solver"] = "gurobi"
         ampl.solve()
         self.assertEqual(ampl.get_value("solve_result"), "solved")
@@ -89,7 +89,7 @@ class TestEfficientFrontierModels(TestBase.TestBase):
         ampl.set["A"] = ef.tickers
         ampl.param["S"] = pd.DataFrame(
             ef.cov_matrix, index=ef.tickers, columns=ef.tickers
-        ).unstack(level=0)
+        )
         ampl.param["mu"] = ef.expected_returns
         ampl.option["solver"] = "gurobi"
         ampl.solve()
@@ -130,7 +130,7 @@ class TestEfficientFrontierModels(TestBase.TestBase):
         ampl.set["A"] = ef.tickers
         ampl.param["S"] = pd.DataFrame(
             ef.cov_matrix, index=ef.tickers, columns=ef.tickers
-        ).unstack(level=0)
+        )
         ampl.param["mu"] = ef.expected_returns
         ampl.param["target_volatility"] = 0.15
         ampl.param["market_neutral"] = False
@@ -178,7 +178,7 @@ class TestEfficientFrontierModels(TestBase.TestBase):
         ampl.set["A"] = ef.tickers
         ampl.param["S"] = pd.DataFrame(
             ef.cov_matrix, index=ef.tickers, columns=ef.tickers
-        ).unstack(level=0)
+        )
         ampl.param["mu"] = ef.expected_returns
         ampl.param["target_volatility"] = 0.15
         ampl.param["market_neutral"] = False
@@ -227,7 +227,7 @@ class TestEfficientFrontierModels(TestBase.TestBase):
         ampl.set["A"] = ef.tickers
         ampl.param["S"] = pd.DataFrame(
             ef.cov_matrix, index=ef.tickers, columns=ef.tickers
-        ).unstack(level=0)
+        )
         ampl.param["mu"] = ef.expected_returns
         ampl.param["target_return"] = 0.07
         ampl.param["market_neutral"] = True
@@ -272,7 +272,7 @@ class TestEfficientFrontierModels(TestBase.TestBase):
         ampl.set["A"] = ef.tickers
         ampl.param["S"] = pd.DataFrame(
             ef.cov_matrix, index=ef.tickers, columns=ef.tickers
-        ).unstack(level=0)
+        )
         ampl.param["mu"] = ef.expected_returns
         ampl.param["gamma"] = 0.2
         ampl.param["target_return"] = 0.07
@@ -318,7 +318,7 @@ class TestEfficientFrontierModels(TestBase.TestBase):
         ampl.set["A"] = ef.tickers
         ampl.param["S"] = pd.DataFrame(
             ef.cov_matrix, index=ef.tickers, columns=ef.tickers
-        ).unstack(level=0)
+        )
         ampl.param["mu"] = ef.expected_returns
         ampl.param["risk_aversion"] = 2
         ampl.param["market_neutral"] = False
@@ -373,7 +373,7 @@ class TestEfficientFrontierModels(TestBase.TestBase):
         ampl.set["A"] = ef.tickers
         ampl.param["S"] = pd.DataFrame(
             ef.cov_matrix, index=ef.tickers, columns=ef.tickers
-        ).unstack(level=0)
+        )
         ampl.param["mu"] = ef.expected_returns
         ampl.param["target_volatility"] = 0.15
         sectors = set(sector_mapper.values())
@@ -436,7 +436,7 @@ class TestEfficientFrontierModels(TestBase.TestBase):
         ampl.set["A"] = ef.tickers
         ampl.param["S"] = pd.DataFrame(
             ef.cov_matrix, index=ef.tickers, columns=ef.tickers
-        ).unstack(level=0)
+        )
         ampl.param["mu"] = ef.expected_returns
         ampl.param["card_ub"] = 3
         ampl.param["target_volatility"] = 0.15

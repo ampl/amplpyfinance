@@ -70,7 +70,7 @@ class EfficientFrontier(pypfopt.base_optimizer.BaseOptimizer):
             ampl.set["A"] = tickers
             ampl.param["S"] = pd.DataFrame(
                 cov_matrix, index=tickers, columns=tickers
-            ).unstack(level=0)
+            )
             ampl.param["mu"] = expected_returns
             ampl.param["lb"] = weight_bounds[0]
             ampl.param["ub"] = weight_bounds[1]
@@ -236,9 +236,7 @@ class EfficientFrontier(pypfopt.base_optimizer.BaseOptimizer):
 
         ampl = self.ampl
         ampl.set["A"] = tickers
-        ampl.param["S"] = pd.DataFrame(
-            self.cov_matrix, index=tickers, columns=tickers
-        ).unstack(level=0)
+        ampl.param["S"] = pd.DataFrame(self.cov_matrix, index=tickers, columns=tickers)
         if self.expected_returns is not None:
             ampl.param["mu"] = self.expected_returns
         lb, ub = self.weight_bounds
