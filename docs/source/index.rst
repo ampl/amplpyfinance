@@ -10,7 +10,7 @@ interface. The main purpose of this project is to illustrate how to use
 ``amplpy`` with financial models and how to :ref:`deploy containerized applications<deployment>` using it.
 
 .. image:: https://static.streamlit.io/badges/streamlit_badge_black_white.svg
-    :target: http://ampl.com/streamlit/Risk_Return
+    :target: https://ampl.com/streamlit/Risk_Return
     :alt: Streamlit App
 
 .. image:: https://colab.research.google.com/assets/colab-badge.svg

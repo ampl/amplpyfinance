@@ -18,7 +18,7 @@ Using Compose is basically a three-step process:
 
 ### Deployment with Docker Compose
 
-A basic [Docker Compose](https://docs.docker.com/compose/) template for orchestrating a [Flask](http://flask.pocoo.org/) application & a [Celery](http://www.celeryproject.org/) queue with [Redis](https://redis.io/) can be found at [amplpyfinance/deployment/docker](https://github.com/ampl/amplpyfinance/tree/master/deployment/docker).
+A basic [Docker Compose](https://docs.docker.com/compose/) template for orchestrating a [Flask](https://flask.pocoo.org/) application & a [Celery](https://www.celeryproject.org/) queue with [Redis](https://redis.io/) can be found at [amplpyfinance/deployment/docker](https://github.com/ampl/amplpyfinance/tree/master/deployment/docker).
 
 Jobs submitted to the flask application are sent to the queue and then processed by one of the optimization workers (docker containers with AMPL and solvers installed) where [amplpyfinance](https://github.com/ampl/amplpyfinance) is used to solve optimization problems.
 
