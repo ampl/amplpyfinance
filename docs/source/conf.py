@@ -128,6 +128,7 @@ html_theme_options = {
     "logo_text": "amplpyfinance",
 }
 
+html_baseurl = "https://amplpyfinance.ampl.com"
 
 # Add any paths that contain custom themes here, relative to this directory.
 # html_theme_path = []
@@ -223,7 +224,7 @@ latex_documents = [
         "index",
         "amplpyfinance.tex",
         "amplpyfinance documentation",
-        "Filipe Brandão",
+        "AMPL Optimization Inc.",
         "manual",
     ),
 ]
@@ -254,7 +255,13 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ("index", "amplpyfinance", "amplpyfinance documentation", ["Filipe Brandão"], 1)
+    (
+        "index",
+        "amplpyfinance",
+        "amplpyfinance documentation",
+        ["AMPL Optimization Inc."],
+        1,
+    )
 ]
 
 # If true, show URL addresses after external links.
@@ -271,7 +278,7 @@ texinfo_documents = [
         "index",
         "amplpyfinance",
         "amplpyfinance documentation",
-        "Filipe Brandão",
+        "AMPL Optimization Inc.",
         "amplpyfinance",
         "This package replicates some financial portfolio optimization models from pypfopt using amplpy.",
         "Miscellaneous",
