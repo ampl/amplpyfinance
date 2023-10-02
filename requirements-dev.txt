@@ -1,4 +1,4 @@
-yfinance>=0.1.70
+yfinance==0.1.70
 coverage>=6.3.2
 numpy>=1.21.2
 cvxopt>=1.3.0
