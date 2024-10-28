@@ -95,38 +95,17 @@ html_theme = "ampl_sphinx_theme"
 # documentation.
 # html_theme_options = {}
 html_theme_options = {
-    "logo_link": "index",
     "icon_links": [
         {
             "name": "GitHub",
             "url": "https://github.com/ampl/amplpyfinance",
             "icon": "fab fa-github fa-fw",
         },
-        {
-            "name": "AMPL Resources",
-            "url": "https://developers.ampl.com",
-            "icon": "fas fa-book fa-fw",
-            "target": "_self",
-        },
-        {
-            "name": "AMPL Portal",
-            "url": "https://portal.ampl.com",
-            "icon": "fas fa-sign-in-alt fa-fw",
-            "target": "_self",
-        },
-        {
-            "name": "AMPL.com",
-            "url": "https://ampl.com",
-            "icon": "fas fa-home fa-fw",
-            "target": "_self",
-        },
     ],
     "collapse_navigation": True,
-    "external_links": [
-        # {"name": "ampl.github.io", "url": "https://ampl.github.io"},
-    ],
     "logo_text": "amplpyfinance",
 }
+html_context = {"default_mode": "light"}
 
 html_baseurl = "https://amplpyfinance.ampl.com"
 
