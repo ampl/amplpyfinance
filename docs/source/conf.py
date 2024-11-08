@@ -102,7 +102,6 @@ html_theme_options = {
             "icon": "fab fa-github fa-fw",
         },
     ],
-    "collapse_navigation": True,
     "logo_text": "amplpyfinance",
 }
 html_context = {"default_mode": "light"}
