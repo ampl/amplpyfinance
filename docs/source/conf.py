@@ -21,6 +21,7 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.viewcode",
     "myst_parser",
+    "sphinxcontrib.googleanalytics",
 ]
 
 myst_heading_anchors = 3
@@ -105,6 +106,7 @@ html_theme_options = {
     "logo_text": "amplpyfinance",
 }
 html_context = {"default_mode": "light"}
+googleanalytics_id = "G-2P0QVRCB55"
 
 html_baseurl = "https://amplpyfinance.ampl.com"
 
