@@ -21,6 +21,7 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.viewcode",
     "myst_parser",
+    "sphinx_sitemap",
     "sphinxcontrib.googleanalytics",
 ]
 
