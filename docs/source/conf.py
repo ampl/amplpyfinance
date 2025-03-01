@@ -111,6 +111,10 @@ googleanalytics_id = "G-2P0QVRCB55"
 
 html_baseurl = "https://amplpyfinance.ampl.com"
 
+html_extra_path = ["_html"]
+
+sitemap_filename = "sphinx-sitemap.xml"
+
 # Add any paths that contain custom themes here, relative to this directory.
 # html_theme_path = []
 
