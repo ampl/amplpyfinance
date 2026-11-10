@@ -103,6 +103,11 @@ html_theme_options = {
             "url": "https://github.com/ampl/amplpyfinance",
             "icon": "fab fa-github fa-fw",
         },
+        {
+            "name": "AI for Optimization",
+            "url": "https://dev.ampl.com/ai/index.html",
+            "icon": "fas fa-robot fa-fw",
+        },
     ],
     "logo_text": "amplpyfinance",
 }
